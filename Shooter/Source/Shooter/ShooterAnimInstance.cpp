@@ -8,23 +8,23 @@
 
 void UShooterAnimInstance::UpdateAnimationPropertires(float DeltaTime)
 {
-	if (ShooterCharcter == nullptr)
+	if (ShooterCharacter == nullptr)
 	{
-		ShooterCharcter = Cast<AShooterCharacter>(TryGetPawnOwner());
+		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());
 	}
 
-	if (ShooterCharcter)
+	if (ShooterCharacter)
 	{
 		// Get the speed of the character from velocity
-		FVector Velocity{ ShooterCharcter->GetVelocity() };
+		FVector Velocity{ ShooterCharacter->GetVelocity() };
 		Velocity.Z = 0;
 		Speed = Velocity.Size();
 
 		// Is the character is in the air
-		bIsInAir = ShooterCharcter->GetCharacterMovement()->IsFalling();
+		bIsInAir = ShooterCharacter->GetCharacterMovement()->IsFalling();
 
 		// Is the character Accelerating
-		if (ShooterCharcter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
+		if (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
 		{
 			bIsAccelerating = true;
 		}
@@ -33,8 +33,8 @@ void UShooterAnimInstance::UpdateAnimationPropertires(float DeltaTime)
 			bIsAccelerating = false;
 		}
 
-		FRotator AimRotation = ShooterCharcter->GetBaseAimRotation();
-		FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharcter->GetVelocity());
+		FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+		FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
 		
 		//FString RotationMessage = FString::Printf(TEXT("Base Aim Rotation: %f"), AimRotation.Yaw);
 		//FString MovementRotationMessage = FString::Printf(TEXT("Movement Rotation: %f"), MovementRotation.Yaw);
@@ -42,6 +42,11 @@ void UShooterAnimInstance::UpdateAnimationPropertires(float DeltaTime)
 		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(
 			MovementRotation,
 			AimRotation).Yaw;
+
+		if (ShooterCharacter->GetVelocity().Size() > 0.f)
+		{
+			LastMovementOffsetYaw = MovementOffsetYaw;
+		}
 
 		/*
 		FString OffsetMessage = FString::Printf(TEXT("Movement Offset Yaw: %f"), MovementOffsetYaw);
@@ -56,5 +61,5 @@ void UShooterAnimInstance::UpdateAnimationPropertires(float DeltaTime)
 
 void UShooterAnimInstance::NativeInitializeAnimation()
 {
-	ShooterCharcter = Cast<AShooterCharacter>(TryGetPawnOwner());
+	ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());
 }
