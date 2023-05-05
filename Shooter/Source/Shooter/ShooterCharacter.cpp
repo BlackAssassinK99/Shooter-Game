@@ -294,6 +294,30 @@ void AShooterCharacter::SetLookRates()
 	}
 }
 
+void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
+{
+	FVector2D WalkSpeedRange{ 0.f, 600.f };
+	FVector2D VelocityMultiplierRange{ 0.f, 1.f };
+	FVector Velocity{ GetVelocity() };
+	Velocity.Z = 0.f;
+
+	// Calculate crosshair velocity factor
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+
+	// Calculate crosshair in air factor
+	if (GetCharacterMovement()->IsFalling()) // is in air?
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
+	}
+	else // Character is on the ground
+	{
+		// Shrink the crosshair rapidly while on the ground
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+	}
+
+	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor;
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -305,6 +329,8 @@ void AShooterCharacter::Tick(float DeltaTime)
 	// Change look sensitivity based on aiming
 	SetLookRates();
 	
+	// Calulate crosshair spread multiplier
+	CalculateCrosshairSpread(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -327,5 +353,10 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimingButtonReleased);
+}
+
+float AShooterCharacter::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairSpreadMultiplier;
 }
 
