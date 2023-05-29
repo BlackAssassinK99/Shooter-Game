@@ -78,6 +78,9 @@ protected:
 
 	void AutoFireReset();
 
+	/** Line trace for itens under the crosshairs */
+	bool TraceUnderCrosshair(FHitResult& OutHitResult);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -195,15 +198,17 @@ private:
 	bool bFiringBullet;
 
 	FTimerHandle CrosshairShootTimer;
+	/** Rate of automatic gun fire */
+		float AutomaticFireRate;
+	/** True when we can fire. False when waiting for the timer */
+	bool bShouldFire;
 
 	/** True when Left mouse button or controller right trigger pressed */
 	bool bFireButtonPressed;
 
-	/** True when we can fire. False when waiting for the timer */
-	bool bShouldFire;
+	
 
-	/** Rate of automatic gun fire */
-	float AutomaticFireRate;
+	
 
 	/** Sets a timer between gunshots */
 	FTimerHandle AutoFireTimer;
