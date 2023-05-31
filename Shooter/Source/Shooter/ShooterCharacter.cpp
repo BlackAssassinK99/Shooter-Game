@@ -47,7 +47,10 @@ AShooterCharacter::AShooterCharacter() :
 	// Automatic Fire Variables
 	AutomaticFireRate(0.1f),
 	bShouldFire(true),
-	bFireButtonPressed(false)
+	bFireButtonPressed(false),
+	// Item trace variables
+	bShouldTraceForItems(false)
+
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -221,7 +224,7 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 	}
 	else // no crosshair trace hit
 	{
-		// OutBeamLocation ia the end location for thr line trace
+		// OutBeamLocation is the end location for thr line trace
 	}
 
 	// perform a second trace, this time from the gun barrel
@@ -410,6 +413,46 @@ bool AShooterCharacter::TraceUnderCrosshair(FHitResult& OutHitResult, FVector& O
 	return false;
 }
 
+void AShooterCharacter::TraceForItems()
+{
+	if (bShouldTraceForItems)
+	{
+		FHitResult ItemTraceResult;
+		FVector HitLocation;
+		TraceUnderCrosshair(ItemTraceResult, HitLocation);
+		if (ItemTraceResult.bBlockingHit)
+		{
+			AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
+			if (HitItem && HitItem->GetPickupWidget())
+			{
+				// Show item pickup widget
+				HitItem->GetPickupWidget()->SetVisibility(true);
+
+			}
+
+			// we hit AItem last frame
+			if (TraceHitItemLastFrame)
+			{
+				if (HitItem != TraceHitItemLastFrame)
+				{
+					// we are hitting a different Aitem this frame from last frame
+					// or AItem is null.
+					TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+				}
+			}
+
+			// store a reference to HitItem for next frame
+			TraceHitItemLastFrame = HitItem;
+		}
+		else if (TraceHitItemLastFrame)
+		{
+			// No longer overlapping any items
+			// Item last frame should not show widget
+			TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+		}
+	}
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -424,19 +467,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 	// Calulate crosshair spread multiplier
 	CalculateCrosshairSpread(DeltaTime);
 
-	FHitResult ItemTraceResult;
-	FVector HitLocation;
-	TraceUnderCrosshair(ItemTraceResult, HitLocation);
-	if (ItemTraceResult.bBlockingHit)
-	{
-		AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
-		if (HitItem && HitItem->GetPickupWidget())
-		{
-			// Show item pickup widget
-			HitItem->GetPickupWidget()->SetVisibility(true);
-
-		}
-	}
+	// Check overlappedItemCount, then for items
+	TraceForItems();
+	
 }
 
 // Called to bind functionality to input
@@ -466,5 +499,19 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
+}
+
+void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
+{
+	if (OverlappedItemCount + Amount <= 0)
+	{
+		OverlappedItemCount = 0;
+		bShouldTraceForItems = false;
+	}
+	else
+	{
+		OverlappedItemCount += Amount;
+		bShouldTraceForItems = true;
+	}
 }
 
