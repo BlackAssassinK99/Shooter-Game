@@ -79,7 +79,8 @@ protected:
 	void AutoFireReset();
 
 	/** Line trace for itens under the crosshairs */
-	bool TraceUnderCrosshair(FHitResult& OutHitResult);
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
+
 
 public:	
 	// Called every frame
@@ -205,10 +206,6 @@ private:
 
 	/** True when Left mouse button or controller right trigger pressed */
 	bool bFireButtonPressed;
-
-	
-
-	
 
 	/** Sets a timer between gunshots */
 	FTimerHandle AutoFireTimer;
