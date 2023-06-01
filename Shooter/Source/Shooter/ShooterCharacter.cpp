@@ -444,12 +444,12 @@ void AShooterCharacter::TraceForItems()
 			// store a reference to HitItem for next frame
 			TraceHitItemLastFrame = HitItem;
 		}
-		else if (TraceHitItemLastFrame)
-		{
-			// No longer overlapping any items
-			// Item last frame should not show widget
-			TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
-		}
+	}
+	else if (TraceHitItemLastFrame)
+	{
+		// No longer overlapping any items
+		// Item last frame should not show widget
+		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 	}
 }
 
