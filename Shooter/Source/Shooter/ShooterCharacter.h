@@ -84,6 +84,8 @@ protected:
 	/** Trace for Items if overlappedItemCount > 1 */
 	void TraceForItems();
 
+	void SpawnDefaultWeapon();
+
 
 public:	
 	// Called every frame
@@ -222,6 +224,14 @@ private:
 	/** The AItem we hit last Frame */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	class AItem* TraceHitItemLastFrame;
+
+	/** Currently equipped weapon */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	class AWeapon* EquippedWeapon;
+
+	/** Set this in Blueprints for the default class */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 public:
 	/** Returns CameraBoom subobject */
